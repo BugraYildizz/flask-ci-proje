@@ -59,6 +59,7 @@ jobs:
           severity: 'HIGH,CRITICAL'
           format: 'sarif'
           output: 'trivy-results.sarif'
+          trivyignores: '.trivyignore'
 
       - name: Upload SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
