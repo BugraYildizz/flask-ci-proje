@@ -57,4 +57,6 @@ jobs:
           export TESTING_IMAGE=ghcr.io/bugrayildizz/flask-ci-proje:"$GITHUB_RUN_ID"
           envsubst < manifests/deployment.yaml | kubectl apply -f -
           kubectl rollout status deployment flaskapp --timeout=90s
-          kubectl exec deploy/flaskapp -- curl --fail localhost:5000/health
+          kubectl port-forward deploy/flaskapp 5000:5000 &
+          sleep 5
+          curl --fail localhost:5000/health
