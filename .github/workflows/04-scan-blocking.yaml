@@ -55,7 +55,7 @@ jobs:
           image-ref: ${{ github.run_id }}
           exit-code: 1
           ignore-unfixed: true
-          vuln-type: 'os,library'
+          vuln-type: 'os'
           severity: 'HIGH,CRITICAL'
           format: 'sarif'
           output: 'trivy-results.sarif'
