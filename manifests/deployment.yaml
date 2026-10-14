@@ -12,6 +12,9 @@ spec:
       labels:
         app: flaskapp
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
       imagePullSecrets:
         - name: regcred
       containers:
@@ -19,3 +22,8 @@ spec:
           image: ${TESTING_IMAGE}
           ports:
             - containerPort: 5000
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
