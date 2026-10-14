@@ -1,4 +1,0 @@
-# Bu CVE'ler pip ve bagimliliklarindan geliyor.
-# Uygulama calisirken pip kullanilmiyor, risk dusuk.
-CVE-2026-97689
-CVE-2026-97687
