@@ -58,7 +58,6 @@ jobs:
           vuln-type: 'os'
           severity: 'HIGH,CRITICAL'
           format: table
-          trivyignores: '.trivyignore'
 
       - name: Trivy SARIF report
         uses: aquasecurity/trivy-action@master
