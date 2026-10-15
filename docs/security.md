@@ -120,6 +120,17 @@ kubectl auth can-i get secrets --as=system:serviceaccount:default:default
 ```
 Traefik'in meşru erişimi korundu.
 ---
+
+---
+
+## 6. Ağ erişimi
+
+Uygulama hiçbir port yayınlamadan çalışır. Erişim yalnızca zero trust tüneli
+üzerinden, kimliği doğrulanmış cihazlarla mümkündür.
+
+Kurulum, doğrulama ve gerekçeler: [tailscale.md](tailscale.md)
+
+
 Bilinen sınırlar
 Python bağımlılıkları taranmıyor. `vuln-type: 'os'` ayarı nedeniyle engelleyici tarama yalnızca işletim sistemi paketlerine bakar.
 Gerekçe: bulunan Python açıklarının tamamı `pip`, `setuptools`, `urllib3` gibi paket kurma araçlarından geliyordu. Bunlar `requirements.txt` değiştirilerek düzeltilemiyor (pip kendi gömülü kopyasını taşıyor) ve uygulama çalışırken kullanılmıyorlar.
