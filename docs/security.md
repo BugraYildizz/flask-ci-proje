@@ -241,6 +241,32 @@ securityContext:
 **KSV-0110** — ayrı namespace önerisi. Smoke test kümesi geçici olduğu için
 `default` namespace yeterli.
 
+## 9. İmaj imzalama (Cosign)
+
+İmajlar CI'da imzalanıyor, Kubernetes'e dağıtılmadan önce doğrulanıyor.
+
+**Neden:** Trivy imajda açık var mı diye bakıyor, ama imajın gerçekten bizim
+ürettiğimiz imaj olduğunu söylemiyor. Registry'ye sızan biri imajı
+değiştirebilir. İmza bunu yakalıyor — digest değişince doğrulama başarısız
+oluyor ve dağıtım duruyor.
+
+Keyless mod kullanıldı, saklanacak anahtar yok. Doğrulama hem kimin hem
+nereden imzaladığını kontrol ediyor.
+
+---
+
+## 10. Çalışma zamanı izleme (Falco)
+
+Test ortamında denendi, kalıcı kurulum yapılmadı.
+
+**Neden:** Diğer araçlar imajı dağıtımdan önce denetliyor. Falco çalışırken ne
+olduğunu izliyor — konteynere kabuk açılması, hassas dosya okunması gibi
+şüpheli davranışları kaydediyor.
+
+Engellemiyor, kaydediyor. Değeri bir olay yaşandığında geriye dönüp izleri
+takip edebilmekte.
+
+
 Bilinen sınırlar
 Python bağımlılıkları taranmıyor. `vuln-type: 'os'` ayarı nedeniyle engelleyici tarama yalnızca işletim sistemi paketlerine bakar.
 Gerekçe: bulunan Python açıklarının tamamı `pip`, `setuptools`, `urllib3` gibi paket kurma araçlarından geliyordu. Bunlar `requirements.txt` değiştirilerek düzeltilemiyor (pip kendi gömülü kopyasını taşıyor) ve uygulama çalışırken kullanılmıyorlar.
