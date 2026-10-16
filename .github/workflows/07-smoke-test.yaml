@@ -14,6 +14,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
 
     steps:
 
@@ -37,6 +38,13 @@ jobs:
           tags: ghcr.io/bugrayildizz/flask-ci-proje:${{ github.run_id }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign image
+        run: |
+          cosign sign --yes \
+            ghcr.io/bugrayildizz/flask-ci-proje@${{ steps.build.outputs.digest }}
 
       - name: Create k3d cluster
         uses: AbsaOSS/k3d-action@v2.4.0
@@ -47,6 +55,13 @@ jobs:
             --agents 1
             --no-lb
             --k3s-arg "--disable=traefik,servicelb,metrics-server@server:*"
+
+      - name: Verify signature
+        run: |
+          cosign verify \
+            --certificate-identity-regexp "https://github.com/BugraYildizz/flask-ci-proje/.*" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            ghcr.io/bugrayildizz/flask-ci-proje@${{ steps.build.outputs.digest }}
 
       - name: Deploy and smoke test
         run: |
