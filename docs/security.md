@@ -131,6 +131,66 @@ Uygulama hiçbir port yayınlamadan çalışır. Erişim yalnızca zero trust t�
 Kurulum, doğrulama ve gerekçeler: [tailscale.md](tailscale.md)
 
 
+---
+
+## 7. Host yapılandırma denetimi (Docker Bench)
+
+[Docker Bench](https://github.com/docker/docker-bench-security) ile CIS Docker
+Benchmark'a göre yaklaşık 86 kontrol çalıştırıldı.
+
+```bash
+sudo bash docker-bench-security.sh
+```
+
+### Geçen kontroller
+
+Dosya izinleri (Bölüm 3) neredeyse tamamen geçti. Docker soketi, servis
+dosyaları ve dizin sahiplikleri standart kurulumla doğru ayarlanmış.
+
+`2.7` — Daemon TCP üzerinden dinlemiyor, yalnızca Unix soketi kullanılıyor.
+Uzak erişim SSH context ile yapılıyor.
+
+`4.9` — Dockerfile'da `ADD` yerine `COPY` kullanılıyor.
+
+### Düzeltilen bulgular
+
+**`4.6` HEALTHCHECK eksikti.** Uygulamanın `/health` endpoint'i vardı ama
+Dockerfile'da tanımlı değildi. Eklendi:
+
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')" || exit 1
+```
+
+`curl` yerine Python'un standart kütüphanesi kullanıldı — üretim imajında
+`curl` bulunmuyor.
+
+**`5.1` Swarm modu açıktı** ama kullanılmıyordu. Kapatıldı:
+
+```bash
+docker swarm leave --force
+```
+
+### Kabul edilen bulgular
+
+**Denetim kayıtları (1.1.3 – 1.1.18).** `auditd` ile Docker dosyalarının
+izlenmesi isteniyor. Kurumsal uyumluluk gerekliliği; geliştirme ortamında
+uygulanmadı.
+
+**`2.9` user namespace kapalı.** Konteynerdeki root'u host'ta ayrıcalıksız bir
+kullanıcıya eşler. Docker'da varsayılan olarak kapalı; açmak uyumluluk
+sorunları çıkarabiliyor.
+
+**`4.5` content trust kapalı.** İmaj imzalama henüz uygulanmadı.
+
+### Puanlama hakkında
+
+Araç `PASS` sayısından `WARN` sayısını çıkararak puan veriyor. Sıfır veya
+negatif puan beklenen bir sonuç — CIS benchmark kurumsal üretim ortamları
+için yazılmış. Amaç puanı yükseltmek değil, her maddeyi gözden geçirip bilinçli
+bir karar vermek.
+
+
 Bilinen sınırlar
 Python bağımlılıkları taranmıyor. `vuln-type: 'os'` ayarı nedeniyle engelleyici tarama yalnızca işletim sistemi paketlerine bakar.
 Gerekçe: bulunan Python açıklarının tamamı `pip`, `setuptools`, `urllib3` gibi paket kurma araçlarından geliyordu. Bunlar `requirements.txt` değiştirilerek düzeltilemiyor (pip kendi gömülü kopyasını taşıyor) ve uygulama çalışırken kullanılmıyorlar.
@@ -145,6 +205,8 @@ Kim yetkili? — Hangi roller ilgili kaynağa erişiyor
 Yetki kime bağlı? — Roller hangi kullanıcı/servis hesabına atanmış
 Doğrula — `kubectl auth can-i` ile fiilen test et
 ---
+
+
 Çıkarımlar
 Varsayılanlar güvenli olmak zorunda değildir. MicroK8s kolay kurulum için RBAC'ı kapalı getiriyordu.
 Her bulgu eyleme dönüştürülebilir değildir. `ignore-unfixed` filtresi olmadan 166 uyarı arasında gerçek sorunlar kaybolurdu.
