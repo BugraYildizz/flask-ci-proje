@@ -191,6 +191,56 @@ için yazılmış. Amaç puanı yükseltmek değil, her maddeyi gözden geçirip
 bir karar vermek.
 
 
+---
+
+## 8. Yapılandırma taraması (Trivy misconfig)
+
+Dockerfile ve Kubernetes manifesti ayrıca yapılandırma hatalarına karşı tarandı:
+
+```bash
+trivy fs --scanners misconfig .
+```
+
+**Dockerfile:** 0 bulgu.
+
+**deployment.yaml:** 10 bulgu → düzeltme sonrası 4.
+
+### Düzeltilenler
+
+**Kaynak sınırları yoktu** (KSV-0011, 0015, 0016, 0018). Cgroup seviyesinde
+hizmet reddi koruması sağlıyor — bellek sızıntısı olan bir konteyner node'u
+çökertemiyor.
+
+```yaml
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "500m"
+```
+
+**Seccomp profili belirtilmemişti** (KSV-0030, KSV-0104). Docker varsayılan
+olarak uyguluyor ama Kubernetes'te açıkça bildirmek gerekiyor.
+
+```yaml
+securityContext:
+  seccompProfile:
+    type: RuntimeDefault
+```
+
+### Kabul edilen bulgular
+
+**KSV-0013** — yanlış pozitif. Tarayıcı `${TESTING_IMAGE}` değişkenini
+çözemediği için etiket eksik sanıyor; CI'da `run_id` ile sabit etiket veriliyor.
+
+**KSV-0020 / KSV-0021** — UID ve GID'nin 10000 üstü olması öneriliyor
+(host kullanıcı tablosuyla çakışmaması için). Mevcut UID 1001 kullanılıyor.
+
+**KSV-0110** — ayrı namespace önerisi. Smoke test kümesi geçici olduğu için
+`default` namespace yeterli.
+
 Bilinen sınırlar
 Python bağımlılıkları taranmıyor. `vuln-type: 'os'` ayarı nedeniyle engelleyici tarama yalnızca işletim sistemi paketlerine bakar.
 Gerekçe: bulunan Python açıklarının tamamı `pip`, `setuptools`, `urllib3` gibi paket kurma araçlarından geliyordu. Bunlar `requirements.txt` değiştirilerek düzeltilemiyor (pip kendi gömülü kopyasını taşıyor) ve uygulama çalışırken kullanılmıyorlar.
