@@ -91,6 +91,26 @@ olduğunu izliyor — konteynere kabuk açılması, hassas dosya okunması gibi.
 Engellemiyor, kaydediyor. Değeri bir olay yaşandığında geriye dönüp izleri
 takip edebilmekte.
 ---
+
+---
+ 11. Secret yönetimi
+
+Ne: Veritabanı şifresi ortam değişkeni yerine dosyadan okunuyor. Kubernetes
+secret'ı volume olarak bağlanıyor, izinler `0440`.
+
+Neden: Ortam değişkenleri `docker inspect` ile okunabiliyor, günlüklere ve
+hata raporlarına sızabiliyor. Dosyanın izinleri var — sadece uygulamanın
+kullanıcısı okuyabiliyor.
+
+Dikkat: `/run/secrets` kullanılamadı, Kubernetes'in servis hesabı token'ıyla
+çakışıyor. `/app/secrets` kullanıldı.
+
+Dikkat: Secret dosyalarının sahibi root oluyor; ayrıcalıksız kullanıcı
+okuyamıyor. Çözüm: `fsGroup: 1001` ve `defaultMode: 0440`.
+
+Sınır: Secret bir noktada bellekte açık olmak zorunda. Saldırgan konteynerde
+root olursa ulaşır — ayrıcalıksız kullanıcı bu yüzden ilk savunma hattı.
+
 Bilinen sınırlar
 Python bağımlılıkları engelleyici taramada yok. `vuln-type: 'os'` ayarı
 nedeniyle. Bulunan Python açıklarının tamamı `pip`, `setuptools` gibi paket
