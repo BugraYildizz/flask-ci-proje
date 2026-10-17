@@ -4,11 +4,18 @@ import psycopg2
 
 app = Flask(__name__)
 
-DB_HOST = os.environ.get("DB_HOST", "localhost")
-DB_NAME = os.environ.get("DB_NAME", "postgres")
-DB_USER = os.environ.get("DB_USER", "postgres")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "postgres")
+def read_secret(name, default=None):
+    """Önce /run/secrets/<name> dosyasına bakar, yoksa ortam değişkenine düşer."""
+    path = f"/app/secrets/{name}"
+    if os.path.exists(path):
+        with open(path) as f:
+            return f.read().strip()
+    return os.environ.get(name.upper(), default)
 
+DB_HOST = read_secret("db_host", "localhost")
+DB_NAME = read_secret("db_name", "postgres")
+DB_USER = read_secret("db_user", "postgres")
+DB_PASSWORD = read_secret("db_password", "postgres")
 
 @app.route("/")
 def home():
