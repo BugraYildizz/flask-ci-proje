@@ -12,10 +12,10 @@ def read_secret(name, default=None):
             return f.read().strip()
     return os.environ.get(name.upper(), default)
 
-DB_HOST = read_secret("db_host", "localhost")
-DB_NAME = read_secret("db_name", "postgres")
-DB_USER = read_secret("db_user", "postgres")
-DB_PASSWORD = read_secret("db_password", "postgres")
+DATABASE_URL = read_secret(
+    "database_url",
+    "postgresql://postgres:postgres@localhost:5432/postgres"
+)
 
 @app.route("/")
 def home():
@@ -30,21 +30,15 @@ def health():
 @app.route("/db")
 def db_check():
     try:
-        conn = psycopg2.connect(
-            host=DB_HOST,
-            dbname=DB_NAME,
-            user=DB_USER,
-            password=DB_PASSWORD,
-        )
+        conn = psycopg2.connect(DATABASE_URL)
         cur = conn.cursor()
-        cur.execute("SELECT 1")
+        cur.execute("SELECT version()")
         result = cur.fetchone()
         cur.close()
         conn.close()
-        return jsonify({"database": "connected", "result": result[0]})
+        return jsonify({"database": "connected", "version": result[0][:40]})
     except Exception as e:
         return jsonify({"database": "error", "detail": str(e)}), 500
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

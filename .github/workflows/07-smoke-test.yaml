@@ -71,8 +71,7 @@ jobs:
             --docker-username=${{ github.actor }} \
             --docker-password=${{ secrets.GITHUB_TOKEN }}
           kubectl create secret generic db-secret \
-            --from-literal=db_password=test-password \
-            --from-literal=db_host=localhost
+            --from-literal=database_url='#${{ secrets.DATABASE_URL }}'
           export TESTING_IMAGE=ghcr.io/bugrayildizz/flask-ci-proje:"$GITHUB_RUN_ID"
           envsubst < manifests/deployment.yaml | kubectl apply -f -
           kubectl rollout status deployment flaskapp --timeout=90s

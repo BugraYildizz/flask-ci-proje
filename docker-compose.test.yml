@@ -5,10 +5,7 @@ services:
       context: .
       target: test
     environment:
-      DB_HOST: postgres
-      DB_NAME: postgres
-      DB_USER: postgres
-      DB_PASSWORD: postgres
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres
     command: python app.py
 
   postgres:
