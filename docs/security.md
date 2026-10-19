@@ -126,6 +126,19 @@ okunur kullanılıyor.
 Dikkat: Proxy API gruplarını filtreliyor, alt yolları değil. `EXEC=0` ayarı
 `CONTAINERS=1` açıkken işe yaramıyor — test edilerek görüldü.
 
+14.
+---
+
+**Ne:** Üç katman. Compose'da `depends_on: service_healthy` (test başlangıcı),
+uygulamada yeniden deneme (artan beklemeyle), Kubernetes'te readiness ve
+liveness probe'ları.
+
+**Neden:** Başlangıç sırası sorunun küçük bir parçası. Veritabanı çalışma
+ortasında da kopabilir — özellikle yönetilen hizmet kullanıldığında (ağ,
+bakım, uyku modu).
+
+**Doğrulandı:** `/health` kasten 500 döndürecek şekilde bozuldu. Yeni pod
+`0/1` kaldı, eski pod kapatılmadı, trafik kesintisiz devam etti.
 
 Bilinen sınırlar
 Python bağımlılıkları engelleyici taramada yok. `vuln-type: 'os'` ayarı
