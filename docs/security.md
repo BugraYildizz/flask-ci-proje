@@ -116,6 +116,17 @@ root olursa ulaşır — ayrıcalıksız kullanıcı bu yüzden ilk savunma hatt
 Yerel kümede self-signed issuer kullanıldı; gerçek alan adıyla Let's Encrypt'e
 geçiş tek satırlık değişiklik.
 
+
+13.
+
+**Portainer + socket proxy:** Docker soketi doğrudan bağlanmıyor, proxy
+üzerinden erişiliyor. Secret ve kimlik API'leri kapalı. `POST=0` ile salt
+okunur kullanılıyor.
+
+Dikkat: Proxy API gruplarını filtreliyor, alt yolları değil. `EXEC=0` ayarı
+`CONTAINERS=1` açıkken işe yaramıyor — test edilerek görüldü.
+
+
 Bilinen sınırlar
 Python bağımlılıkları engelleyici taramada yok. `vuln-type: 'os'` ayarı
 nedeniyle. Bulunan Python açıklarının tamamı `pip`, `setuptools` gibi paket
