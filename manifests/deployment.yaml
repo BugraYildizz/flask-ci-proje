@@ -42,6 +42,22 @@ spec:
             limits:
               memory: "256Mi"
               cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            failureThreshold: 3 
+
       volumes:
         - name: db-secret
           secret:

@@ -1,6 +1,7 @@
 import os
 from flask import Flask, jsonify
 import psycopg2
+import time 
 
 app = Flask(__name__)
 
@@ -17,6 +18,19 @@ DATABASE_URL = read_secret(
     "postgresql://postgres:postgres@localhost:5432/postgres"
 )
 
+def get_connection(retries=3, delay=1):
+    """Bağlantı koparsa artan bekleme ile tekrar dener."""
+    last_error = None
+    for attempt in range(retries):
+        try:
+            return psycopg2.connect(DATABASE_URL, connect_timeout=5)
+        except psycopg2.OperationalError as e:
+            last_error = e
+            if attempt < retries - 1:
+                time.sleep(delay)
+                delay *= 2
+    raise last_error
+
 @app.route("/")
 def home():
     return jsonify({"message": "Merhaba Docker CI"})
@@ -30,7 +44,7 @@ def health():
 @app.route("/db")
 def db_check():
     try:
-        conn = psycopg2.connect(DATABASE_URL)
+        conn = get_connection()
         cur = conn.cursor()
         cur.execute("SELECT version()")
         result = cur.fetchone()
