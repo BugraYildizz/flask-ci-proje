@@ -111,6 +111,11 @@ okuyamıyor. Çözüm: `fsGroup: 1001` ve `defaultMode: 0440`.
 Sınır: Secret bir noktada bellekte açık olmak zorunda. Saldırgan konteynerde
 root olursa ulaşır — ayrıcalıksız kullanıcı bu yüzden ilk savunma hattı.
 
+12.
+**TLS:** cert-manager ile sertifika üretiliyor ve otomatik yenileniyor.
+Yerel kümede self-signed issuer kullanıldı; gerçek alan adıyla Let's Encrypt'e
+geçiş tek satırlık değişiklik.
+
 Bilinen sınırlar
 Python bağımlılıkları engelleyici taramada yok. `vuln-type: 'os'` ayarı
 nedeniyle. Bulunan Python açıklarının tamamı `pip`, `setuptools` gibi paket
